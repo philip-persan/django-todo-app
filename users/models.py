@@ -24,6 +24,9 @@ class User(AbstractUser):
         default='User.png'
     )
 
+    def __str__(self) -> str:
+        return str(self.get_full_name())
+
     class Meta:
         verbose_name = 'Usuário'
         verbose_name_plural = 'Usuários'

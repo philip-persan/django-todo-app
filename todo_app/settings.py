@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     # * My Apps
     'users',
+    'task',
 ]
 
 PASSWORD_HASHERS = [
