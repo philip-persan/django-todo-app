@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+form {
+  @apply flex flex-col items-center justify-center gap-3;
+}
+
+.login-form {
+  @apply bg-primaryDark p-5 rounded-md shadow-md;
+  @apply flex flex-col items-center justify-center gap-5;
+}
+
+.login-form > h1 {
+  @apply text-center text-2xl font-bold text-ligth;
+}
