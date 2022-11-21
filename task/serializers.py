@@ -5,11 +5,11 @@ from .models import Task
 
 
 class TaskSerializer(ModelSerializer):
-    user = serializers.StringRelatedField()
+    user = serializers.CharField()
     description = serializers.CharField()
     date_created = serializers.DateTimeField()
-    date_completed = serializers.DateTimeField()
-    completed = serializers.BooleanField()
+    date_completed = serializers.DateTimeField(required=False)
+    completed = serializers.BooleanField(required=False)
 
     class Meta:
         model = Task
