@@ -1,30 +1,31 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from .models import Task
+from .permissions import IsOwnerOrAdmin
 from .serializers import TaskSerializer
 
 
 class TaskViewSet(ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
-    def get_serializer_class(self):
-        return super().get_serializer_class()
+    def get_object(self):
+        pk = self.kwargs.get('pk', '')
+        obj = get_object_or_404(self.get_queryset(), id=pk)
+        self.check_object_permissions(self.request, obj)
+        return obj
 
-    def get_serializer(self, *args, **kwargs):
-        return super().get_serializer(*args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["example"] = 'this is in context now'
-        return context
+    def get_permissions(self):
+        if self.request.method in ['PATH', 'DELETE']:
+            return [IsOwnerOrAdmin(), ]
+        return super().get_permissions()
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -38,15 +39,12 @@ class TaskViewSet(ModelViewSet):
         )
 
     def destroy(self, request, *args, **kwargs):
-        id = kwargs.get('pk')
-        task = get_object_or_404(Task, id=id)
+        task = self.get_object()
         task.delete()
         return super().destroy(request, *args, **kwargs)
 
     def patch(self, request, *args, **kwargs):
-        id = kwargs.get('pk')
-
-        task = self.get_queryset().get(id=id)
+        task = self.get_object()
         serializer = TaskSerializer(
             instance=task,
             data=request.data,
