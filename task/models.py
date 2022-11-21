@@ -8,7 +8,7 @@ class Task(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='User',
-        blank=False,
+        blank=True,
         null=True
     )
     description = models.CharField(

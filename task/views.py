@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
@@ -11,6 +13,7 @@ from .serializers import TaskSerializer
 class TaskViewSet(ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         return super().get_serializer_class()
@@ -23,18 +26,25 @@ class TaskViewSet(ModelViewSet):
         context["example"] = 'this is in context now'
         return context
 
-    def get_queryset(self):
-        qs = super().get_queryset()
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+            headers=headers
+        )
 
-        task_id = self.request.query_params.get('task_id', '')
-
-        if task_id != '' and task_id.isnumeric():
-            qs = qs.filter(task_id=task_id)
-
-        return qs
+    def destroy(self, request, *args, **kwargs):
+        id = kwargs.get('pk')
+        task = get_object_or_404(Task, id=id)
+        task.delete()
+        return super().destroy(request, *args, **kwargs)
 
     def patch(self, request, *args, **kwargs):
-        id = kwargs.get('id')
+        id = kwargs.get('pk')
 
         task = self.get_queryset().get(id=id)
         serializer = TaskSerializer(

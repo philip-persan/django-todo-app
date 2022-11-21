@@ -5,7 +5,7 @@ from .models import Task
 
 
 class TaskSerializer(ModelSerializer):
-    user = serializers.CharField()
+    user = serializers.CharField(required=False)
     description = serializers.CharField()
     date_created = serializers.DateTimeField()
     date_completed = serializers.DateTimeField(required=False)
